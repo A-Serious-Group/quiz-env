@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: quiz-postgres
+    image: postgres:latest
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=password
+    networks:
+     - quiz-network
+  pgadmin:
+    container_name: quiz-pgadmin
+    image: dpage/pgadmin4:latest
+    ports:
+      - "9091:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=nathan@quiz.com.br
+      - PGADMIN_DEFAULT_PASSWORD=root
+    networks:
+      - quiz-network
+    depends_on:
+      - postgres
+  api:
+    container_name: quiz-api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    volumes:
+      - ./api:/usr/src/app
+    ports:
+      - "3000:3000"
+    networks:
+      - quiz-network
+  front:
+    container_name: quiz-front
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - quiz-network
+    volumes:
+      - ./front:/app
+networks:
+  quiz-network:
+    name: quiz-network
